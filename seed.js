@@ -53,7 +53,98 @@ const { connect } = require('./db/connection');
   //      createdAt: new Date()
   //    }
   // =============================================================================
+  
+  const hash1 = await bcrypt.hash('password123', 10);
+  const hash2 = await bcrypt.hash('password12', 10);
 
-  console.log('TODO: implement seed.js');
+  const users = await db.collection('users').insertMany([
+    {
+      email: "ahmed@gmail.com",
+      passwordHash: hash1,
+      name: "Ahmed",
+      createdAt: new Date()
+    },
+    {
+      email: "aamir@gmail.com",
+      passwordHash: hash2,
+      name: "Aamir",
+      createdAt: new Date()
+    }
+  ])
+  const userIds = Object.values(users.insertedIds);
+
+  const projects = await db.collection('projects').insertMany([
+    { ownerId: userIds[0], name: 'Work Project', archived: false, createdAt: new Date() },
+    { ownerId: userIds[0], name: 'Side Project', archived: false, createdAt: new Date() },
+    { ownerId: userIds[1], name: 'Home Renovation', archived: false, createdAt: new Date() },
+    { ownerId: userIds[1], name: 'Fitness Goals', archived: true, createdAt: new Date() }
+  ]);
+  const projectIds = Object.values(projects.insertedIds);
+
+  await db.collection('tasks').insertMany([
+  {
+    ownerId: userIds[0],
+    projectId: projectIds[0],
+    title: 'Setup Environment',
+    status: 'todo',
+    priority: 1,
+    tags: ['infra', 'setup'],
+    subtasks: [{ title: 'Install Docker', done: true }, { title: 'Configure Mongo', done: false }],
+    dueDate: new Date(), // Flexible field
+    createdAt: new Date()
+  },
+  {
+    ownerId: userIds[0],
+    projectId: projectIds[0],
+    title: 'Code Review',
+    status: 'in-progress',
+    priority: 2,
+    tags: ['review'],
+    subtasks: [],
+    createdAt: new Date() // No dueDate here (Flexible)
+  },
+    {
+    ownerId: userIds[1],
+    projectId: projectIds[3],
+    title: 'Code Review',
+    status: 'in-progress',
+    priority: 2,
+    tags: ['review'],
+    subtasks: [],
+    dueDate: new Date(),
+    createdAt: new Date() 
+  },
+    {
+    ownerId: userIds[1],
+    projectId: projectIds[1],
+    title: 'Code Review',
+    status: 'in-progress',
+    priority: 2,
+    tags: ['review'],
+    subtasks: [],
+    createdAt: new Date() // No dueDate here (Flexible)
+  },
+    {
+    ownerId: userIds[0],
+    projectId: projectIds[2],
+    title: 'Code Review',
+    status: 'in-progress',
+    priority: 2,
+    tags: ['review'],
+    subtasks: [],
+    createdAt: new Date() // No dueDate here (Flexible)
+  },
+  ]);
+
+  await db.collection('notes').insertMany([
+  { ownerId: userIds[0], projectId: projectIds[1], title: 'Meeting Notes', body: 'Project kickoff', tags: ['work'], pinned: true, createdAt: new Date() },
+  { ownerId: userIds[1], title: 'Shopping List', body: 'Paint, brushes', tags: ['home'], createdAt: new Date() },
+  { ownerId: userIds[0], projectId: projectIds[0],title: 'Meeting Notes', body: 'Project kickoff', tags: ['work'], pinned: true, createdAt: new Date() },
+  { ownerId: userIds[1], title: 'Shopping List', body: 'Paint, brushes', tags: ['home'], createdAt: new Date() },
+  { ownerId: userIds[0], title: 'Meeting Notes', body: 'Project kickoff', tags: ['work'], pinned: true, createdAt: new Date() },
+  { ownerId: userIds[1], projectId: projectIds[2],title: 'Shopping List', body: 'Paint, brushes', tags: ['home'], createdAt: new Date() }
+]);
+
+
   process.exit(0);
 })();

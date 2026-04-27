@@ -33,19 +33,13 @@ const { ObjectId } = require('mongodb');
  * @param {Db} db
  * @param {{ email: string, passwordHash: string, name: string }} userData
  * @returns {Promise<{ insertedId: ObjectId }>}
- *
- * Expected behaviour:
- *   - If email is unique → returns { insertedId: <new ObjectId> }
- *   - If email already exists → MongoDB throws a duplicate-key error
- *     (the route catches this and shows "email taken")
- *
- * The document you insert should also include `createdAt: new Date()`.
- *
- * Hint: insertOne. Nothing fancy.
+
  */
 async function signupUser(db, userData) {
-  // TODO: implement
-  throw new Error('signupUser not implemented');
+  const result = await db.collection('users').insertOne({
+    ...userData, createdAt: new Date()
+  });
+  return {insertedId:result.insertedId};
 }
 
 /**
@@ -64,8 +58,10 @@ async function signupUser(db, userData) {
  * Hint: findOne with an exact-match filter.
  */
 async function loginFindUser(db, email) {
-  // TODO: implement
-  throw new Error('loginFindUser not implemented');
+  const result = await db.collection('users').findOne({
+    email
+  })
+  return result;
 }
 
 /**
